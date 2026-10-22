@@ -23,3 +23,4 @@ venv/
 
 # runtime local do agente (banco de eventos, logs, dados derivados)
 var/
+!.env.example

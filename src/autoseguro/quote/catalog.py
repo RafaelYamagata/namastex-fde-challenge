@@ -53,6 +53,11 @@ class PlanCatalog:
                 except (httpx.HTTPError, ValueError) as exc:
                     log_event("planos_fetch_failed", attempt=attempt, error=type(exc).__name__)
         log_event("planos_snapshot_used", path=str(SNAPSHOT_PATH))
+        return cls.snapshot()
+
+    @classmethod
+    def snapshot(cls) -> PlanCatalog:
+        """The table bundled with the agent (a copy of quote-service/data/plans.json)."""
         return cls(json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8")), source="snapshot")
 
     @property
