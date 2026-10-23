@@ -37,6 +37,8 @@ addopts = "-m 'not llm'"
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+# code that came with the challenge stays as delivered
+extend-exclude = ["quote-service", "scripts/generate_dataset.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
