@@ -1,0 +1,24 @@
+name = "05_objecao_e_negociacao"
+description = """
+O lead pede o plano Completo e acha caro. O agente cota uma alternativa mais barata
+(Essencial), explicando a troca; o lead diz que a concorrente cobra menos e o agente passa
+para um humano, que tem alçada para negociar.
+"""
+lead_name = "Rafael Gomes"
+
+[api]
+failure_rate = 0.2
+slow_rate = 0.1
+seed = 5
+
+[[turns]]
+messages = ["oi, quero cotar o plano completo pro meu Kwid 2015"]
+
+[[turns]]
+messages = ["31 anos, cep 59010-000, pode ser a partir de amanhã"]
+
+[[turns]]
+messages = ["nossa, achei caro"]
+
+[[turns]]
+messages = ["a Porto Seguro me ofereceu menos"]

@@ -1,0 +1,23 @@
+name = "04_lead_inelegivel"
+description = """
+Lead com 78 anos, acima do limite da tabela de aceitação. O agente confirma o dado (pode ser
+erro de digitação), coleta o que falta para o especialista e encaminha (handoff `inelegivel`),
+sem chamar a API e sem falar em recusa.
+"""
+lead_name = "Antonio Ribeiro"
+
+[api]
+failure_rate = 0.2
+slow_rate = 0.1
+
+[[turns]]
+messages = ["Olá, quero fazer o seguro do meu Compass 2022"]
+
+[[turns]]
+messages = ["tenho 78 anos"]
+
+[[turns]]
+messages = ["sim, 78"]
+
+[[turns]]
+messages = ["41820-021"]

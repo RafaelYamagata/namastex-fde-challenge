@@ -1,0 +1,31 @@
+name = "01_caminho_feliz"
+description = """
+Caminho feliz: o lead passa os dados aos poucos (e manda o CPF sem ninguém pedir), recebe a
+cotação dos três planos, tira uma dúvida e fecha o Completo. O CEP é de região de risco
+(agravo de 30%) e a vigência começa no meio do mês (primeiro pagamento proporcional). A API
+roda com a instabilidade padrão (20% de erro + 10% de lentidão).
+"""
+lead_name = "Mariana Souza"
+
+[api]
+failure_rate = 0.2
+slow_rate = 0.1
+seed = 11
+
+[[turns]]
+messages = ["Oi, vi o anúncio de vocês, quanto fica o seguro?"]
+
+[[turns]]
+messages = ["é um Onix 2021"]
+
+[[turns]]
+messages = ["tenho 35 anos, cep 07123-456", "meu cpf é 389.083.863-43 se precisar"]
+
+[[turns]]
+messages = ["queria que começasse dia 15"]
+
+[[turns]]
+messages = ["qual a diferença de franquia entre eles?"]
+
+[[turns]]
+messages = ["fechado, vou de completo!"]

@@ -1,0 +1,19 @@
+name = "06_midia_e_pedido_humano"
+description = """
+O lead manda um áudio (o agente pede texto, sem fingir que ouviu) e depois pede para falar com
+uma pessoa: handoff imediato. A mensagem seguinte recebe um único aviso; depois disso o agente
+fica em silêncio, porque a conversa é do humano.
+"""
+lead_name = "Beatriz Lima"
+
+[[turns]]
+messages = ["[audio] mensagem de voz (18s)"]
+
+[[turns]]
+messages = ["prefiro falar com uma pessoa, pode ser?"]
+
+[[turns]]
+messages = ["oi?"]
+
+[[turns]]
+messages = ["alguém aí?"]

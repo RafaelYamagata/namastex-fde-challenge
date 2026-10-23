@@ -1,0 +1,23 @@
+name = "03_api_cai_e_volta"
+description = """
+A API está fora do ar na hora da cotação e volta logo depois. O lead recebe o aviso honesto e,
+quando a API responde, a cotação chega sozinha (mensagem proativa, rodada em segundo plano).
+Depois o lead diz que vai pensar: o agente guarda a cotação, sem handoff.
+"""
+lead_name = "Juliana Costa"
+
+[api]
+failure_rate = 1.0
+slow_rate = 0.0
+deferred_schedule = [5, 15, 30]
+
+[[turns]]
+messages = ["oi! quero cotar o seguro do meu Corolla 2018, só o plano premium"]
+
+[[turns]]
+messages = ["tenho 29 anos", "cep 01310-100, começando dia 1º do mês que vem"]
+
+[[turns]]
+api = { failure_rate = 0.0 }
+wait_deferred = true
+messages = ["vou pensar e te falo"]

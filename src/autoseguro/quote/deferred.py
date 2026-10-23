@@ -34,7 +34,10 @@ class DeferredQuotes:
         quote_id: str,
         conversation_id: str | None,
         on_done: Callable[[QuoteResult], None],
+        on_round: Callable[[QuoteResult, int], None] | None = None,
     ) -> None:
+        """Retry in the background. `on_round` sees every round (for the trace); `on_done`
+        gets the final result once: a price, a definitive answer, or UNAVAILABLE."""
         log_event(
             "quote_deferred",
             quote_id=quote_id,
@@ -43,7 +46,7 @@ class DeferredQuotes:
         )
         thread = threading.Thread(
             target=self._run,
-            args=(request, quote_id, conversation_id, on_done),
+            args=(request, quote_id, conversation_id, on_done, on_round),
             name=f"deferred-{quote_id}",
             daemon=True,
         )
@@ -66,6 +69,7 @@ class DeferredQuotes:
         quote_id: str,
         conversation_id: str | None,
         on_done: Callable[[QuoteResult], None],
+        on_round: Callable[[QuoteResult, int], None] | None,
     ) -> None:
         result: QuoteResult | None = None
         for round_no, delay in enumerate(self._schedule, start=1):
@@ -75,6 +79,8 @@ class DeferredQuotes:
             result = self._client.quote(
                 request, quote_id=quote_id, conversation_id=conversation_id, round_no=round_no
             )
+            if on_round is not None:
+                on_round(result, round_no)
             if result.status is not QuoteStatus.UNAVAILABLE:
                 break
         if result is None:  # empty schedule

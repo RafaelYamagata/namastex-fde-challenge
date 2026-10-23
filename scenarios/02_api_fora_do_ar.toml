@@ -1,0 +1,21 @@
+name = "02_api_fora_do_ar"
+description = """
+A API de cotação cai de vez (100% de falha). O agente tenta, avisa o lead sem inventar preço,
+segue tentando em segundo plano (o circuit breaker evita martelar a API) e, quando o prazo
+acaba, passa para um humano com prioridade alta.
+"""
+lead_name = "Carlos Pereira"
+
+[api]
+failure_rate = 1.0
+slow_rate = 0.0
+deferred_schedule = [3, 6, 12]
+
+[[turns]]
+messages = ["boa tarde, quero uma cotação pro meu HB20 2019"]
+
+[[turns]]
+messages = ["42 anos, cep 30130-000, pode começar hoje"]
+
+[[turns]]
+messages = ["e aí, conseguiu?"]
