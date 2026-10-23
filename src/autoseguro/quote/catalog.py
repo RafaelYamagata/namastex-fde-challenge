@@ -16,6 +16,7 @@ from typing import Any
 
 import httpx
 
+from autoseguro.clock import today as business_today
 from autoseguro.obs import log_event
 
 SNAPSHOT_PATH = Path(__file__).with_name("planos_snapshot.json")
@@ -83,7 +84,7 @@ class PlanCatalog:
 
     def check_vehicle(self, veiculo_ano: int, today: dt.date | None = None) -> Ineligibility | None:
         # Same arithmetic as the API: only the calendar year counts.
-        anos = (today or dt.date.today()).year - veiculo_ano
+        anos = (today or business_today()).year - veiculo_ano
         for band in self.rules["idade_veiculo"]:
             if band["anos_min"] <= anos <= band["anos_max"]:
                 if band.get("recusar"):

@@ -7,6 +7,7 @@ import httpx
 import pytest
 
 from autoseguro.br_formats import cpf_is_valid, format_brl, normalize_cep
+from autoseguro.clock import today as business_today
 from autoseguro.quote import (
     DeferredQuotes,
     IneligibilityCode,
@@ -89,7 +90,7 @@ def _request() -> QuoteRequest:
         idade=40,
         veiculo_ano=2020,
         cep="01310-100",
-        data_inicio=dt.date.today(),
+        data_inicio=business_today(),
     )
 
 
@@ -119,3 +120,27 @@ def test_deferred_reports_unavailable_when_schedule_runs_out():
     result = _run_deferred(client, schedule=(0.01, 0.01))
     assert result.status is QuoteStatus.UNAVAILABLE
     assert client.rounds == [1, 2]
+
+
+def test_business_date_ignores_the_process_timezone(monkeypatch):
+    # A process on UTC+14 is "tomorrow" for most of Brazil's day. Found running in Docker
+    # (UTC): at night, "pode começar hoje" became tomorrow and today counted as the past.
+    import time
+    from zoneinfo import ZoneInfo
+
+    monkeypatch.setenv("TZ", "Pacific/Kiritimati")
+    time.tzset()
+    try:
+        brazil_today = dt.datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+        assert business_today() == brazil_today
+        request = QuoteRequest(
+            plano_id="essencial",
+            idade=40,
+            veiculo_ano=2020,
+            cep="01310-100",
+            data_inicio=brazil_today,
+        )
+        assert request.data_inicio == brazil_today
+    finally:
+        monkeypatch.delenv("TZ")
+        time.tzset()

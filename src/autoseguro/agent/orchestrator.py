@@ -35,6 +35,7 @@ from autoseguro.agent.state import (
     QuoteRecord,
     Stage,
 )
+from autoseguro.clock import today as business_today
 from autoseguro.obs import log_event, new_id, utcnow
 from autoseguro.privacy.redact import PiiKind, redact
 from autoseguro.quote import (
@@ -89,7 +90,7 @@ class Agent:
         store: Store,
         deferred: DeferredQuotes,
         send: Callable[[str, str], None] | None = None,
-        today: Callable[[], dt.date] = dt.date.today,
+        today: Callable[[], dt.date] = business_today,
     ) -> None:
         self.llm = llm
         self.quote_client = quote_client

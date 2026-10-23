@@ -17,6 +17,7 @@ from dataclasses import dataclass
 
 import httpx
 
+from autoseguro.clock import today as business_today
 from autoseguro.local_service import run_quote_service
 from autoseguro.quote.client import QuoteClient
 from autoseguro.quote.models import PLAN_IDS, QuoteRequest, QuoteStatus
@@ -40,7 +41,7 @@ class BenchRow:
 
 
 def _requests(n: int) -> list[QuoteRequest]:
-    start = dt.date.today() + dt.timedelta(days=7)
+    start = business_today() + dt.timedelta(days=7)
     ceps = ["01310-100", "07123-456", "21040-020", "30130-000", "59010-000"]
     # Distinct payloads, so the client's cache never answers for the API.
     return [

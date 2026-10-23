@@ -1,0 +1,12 @@
+.git
+.venv
+.env
+var
+runs
+ai-logs
+dataset
+quote-service
+tests
+docs
+scenarios
+**/__pycache__

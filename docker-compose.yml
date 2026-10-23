@@ -9,4 +9,26 @@ services:
       QUOTE_SLOW_RATE: "0.10"
       QUOTE_SLOW_SECONDS: "8"
       # QUOTE_SEED: "42"   # descomente p/ falhas reproduziveis
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
+
+  # agente (chat no terminal): docker compose run --rm agent
+  agent:
+    build: .
+    profiles: ["agent"]
+    depends_on:
+      quote-api:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      QUOTE_API_URL: http://quote-api:8000
+    volumes:
+      - ./var:/app/var
+    stdin_open: true
+    tty: true

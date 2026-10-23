@@ -16,11 +16,12 @@ import pytest
 from autoseguro.agent.llm import LLMError
 from autoseguro.agent.orchestrator import Agent
 from autoseguro.agent.state import HandoffReason, Stage
+from autoseguro.clock import today as business_today
 from autoseguro.quote import DeferredQuotes, PlanCatalog, QuoteResult, QuoteStatus
 from autoseguro.store import Store
 from autoseguro.trace import render_trace, render_transcript
 
-TODAY = dt.date.today()
+TODAY = business_today()
 START = (TODAY.replace(day=1) + dt.timedelta(days=32)).replace(day=15)
 
 

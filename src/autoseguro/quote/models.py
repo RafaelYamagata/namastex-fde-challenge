@@ -10,6 +10,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from autoseguro.br_formats import normalize_cep
+from autoseguro.clock import today as business_today
 
 PlanId = Literal["essencial", "completo", "premium"]
 PLAN_IDS: tuple[PlanId, ...] = ("essencial", "completo", "premium")
@@ -43,7 +44,7 @@ class QuoteRequest(BaseModel):
     @field_validator("data_inicio")
     @classmethod
     def _not_in_past(cls, value: dt.date) -> dt.date:
-        if value < dt.date.today():
+        if value < business_today():
             raise ValueError("data de início no passado")
         return value
 

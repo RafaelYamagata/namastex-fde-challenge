@@ -30,6 +30,7 @@ from typing import Any
 
 import httpx
 
+from autoseguro.clock import today as business_today
 from autoseguro.obs import log_event, new_id, utcnow
 from autoseguro.quote.breaker import CircuitBreaker
 from autoseguro.quote.models import QuoteAttempt, QuoteRequest, QuoteResult, QuoteStatus
@@ -182,7 +183,7 @@ class QuoteClient:
 
     # The API computes vehicle age from today's date, so a cached quote is only valid today.
     def _cache_key(self, request: QuoteRequest) -> tuple[str, dt.date]:
-        return json.dumps(request.payload(), sort_keys=True), dt.date.today()
+        return json.dumps(request.payload(), sort_keys=True), business_today()
 
     def _cache_get(self, request: QuoteRequest) -> dict[str, Any] | None:
         with self._cache_lock:

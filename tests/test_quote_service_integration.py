@@ -6,6 +6,7 @@ import datetime as dt
 
 import pytest
 
+from autoseguro.clock import today as business_today
 from autoseguro.local_service import run_quote_service
 from autoseguro.quote import CircuitBreaker, QuoteClient, QuoteRequest, QuoteStatus
 
@@ -13,7 +14,7 @@ pytestmark = pytest.mark.integration
 
 
 def _next_month_15th() -> dt.date:
-    today = dt.date.today()
+    today = business_today()
     first_next = (today.replace(day=1) + dt.timedelta(days=32)).replace(day=1)
     return first_next.replace(day=15)
 
@@ -29,7 +30,7 @@ def test_happy_path_matches_the_rules(stable_api):
     req = QuoteRequest(
         plano_id="completo",
         idade=35,
-        veiculo_ano=dt.date.today().year - 1,
+        veiculo_ano=business_today().year - 1,
         cep="07123-456",
         data_inicio=_next_month_15th(),
     )
@@ -48,7 +49,7 @@ def test_refusal_comes_back_as_refused(stable_api):
         idade=80,
         veiculo_ano=2020,
         cep="01310-100",
-        data_inicio=dt.date.today(),
+        data_inicio=business_today(),
     )
     result = client.quote(req)
     assert result.status is QuoteStatus.REFUSED
@@ -64,7 +65,7 @@ def test_total_outage_ends_unavailable_and_opens_the_circuit():
             idade=40,
             veiculo_ano=2020,
             cep="01310-100",
-            data_inicio=dt.date.today(),
+            data_inicio=business_today(),
         )
         result = client.quote(req)
         assert result.status is QuoteStatus.UNAVAILABLE and result.data is None

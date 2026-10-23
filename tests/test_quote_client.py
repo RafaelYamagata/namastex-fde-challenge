@@ -12,6 +12,7 @@ import random
 import httpx
 import pytest
 
+from autoseguro.clock import today as business_today
 from autoseguro.quote import CircuitBreaker, QuoteClient, QuoteRequest, QuoteStatus, RetryPolicy
 
 OK_BODY = {"plano_id": "completo", "premio_mensal": 209.9, "franquia": 3000, "coberturas": []}
@@ -79,7 +80,7 @@ def request(**overrides) -> QuoteRequest:
         "idade": 35,
         "veiculo_ano": 2022,
         "cep": "01310-100",
-        "data_inicio": dt.date.today() + dt.timedelta(days=10),
+        "data_inicio": business_today() + dt.timedelta(days=10),
     }
     return QuoteRequest(**{**data, **overrides})
 
@@ -240,7 +241,7 @@ def test_refusal_counts_as_healthy_for_the_breaker():
         ("cep", "7123-456"),  # lost its leading zero: would be priced for the wrong region
         ("cep", "CEP 01310-100"),
         ("plano_id", "ouro"),
-        ("data_inicio", dt.date.today() - dt.timedelta(days=1)),
+        ("data_inicio", business_today() - dt.timedelta(days=1)),
     ],
 )
 def test_request_rejects_inputs_the_api_would_misprice(field, value):

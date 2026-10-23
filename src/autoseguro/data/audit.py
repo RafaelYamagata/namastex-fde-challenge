@@ -18,6 +18,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from autoseguro.clock import today as business_today
 from autoseguro.quote import PlanCatalog, QuoteClient, QuoteRequest, QuoteResult, QuoteStatus
 
 SILVER_DIR = Path("var/data/silver")
@@ -37,7 +38,7 @@ def _request(row: pd.Series, start: dt.date) -> QuoteRequest:
 def reprice(conversations: pd.DataFrame, api_url: str, concurrency: int = 8) -> pd.DataFrame:
     client = QuoteClient(api_url)
     catalog = PlanCatalog.load(api_url)
-    start = dt.date.today() + dt.timedelta(days=7)
+    start = business_today() + dt.timedelta(days=7)
     requests = [_request(row, start) for row in conversations.itertuples()]
 
     def run(req: QuoteRequest) -> QuoteResult:
