@@ -3,6 +3,11 @@
 Documento de trabalho: as decisões e o escopo combinados antes de começar a implementar.
 O README final explica o resultado; este arquivo registra o caminho.
 
+> **Status:** executado. Mudanças em relação a este plano: o modelo passou a ser o Claude
+> Sonnet 5.5 com esforço baixo (decisão do autor, por latência); o circuit breaker passou de
+> "N falhas seguidas" para taxa de falha numa janela (calibrado para os ~30% de falha normal da
+> API); e entrou um relógio de negócio no fuso de Brasília (bug visto ao rodar no Docker).
+
 **Prazo:** entrega em 23/10/2026. O enunciado fala em ~3 dias, mas o prazo combinado é
 de ~1 dia, então o escopo foi comprimido (ver [Fora do escopo](#fora-do-escopo-e-por-quê)).
 
