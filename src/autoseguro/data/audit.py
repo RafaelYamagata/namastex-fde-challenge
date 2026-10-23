@@ -12,6 +12,7 @@ pre-check from `PlanCatalog` is compared with the API's verdict.
 from __future__ import annotations
 
 import datetime as dt
+import json
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -90,7 +91,9 @@ def _n(value: float) -> str:
     return f"{value:,.0f}".replace(",", ".")
 
 
-def build_report(conv: pd.DataFrame, msgs: pd.DataFrame, audit: pd.DataFrame) -> str:
+def build_report(
+    conv: pd.DataFrame, msgs: pd.DataFrame, audit: pd.DataFrame, pii_residual: int | str = "?"
+) -> str:
     df = conv.merge(audit, on="conversation_id")
     total = len(df)
     eligible = df[df.status_api == "ok"]
@@ -150,7 +153,7 @@ saem da camada Silver (sem dados pessoais) e de cotações feitas na API oficial
 - O nome do lead também aparece nas mensagens do vendedor (saudação): {_n(len(seller_with_name))}
   mensagens. Mascarar só as mensagens do lead não basta.
 - O vendedor pede CPF em todas as conversas; a cotação não usa CPF.
-- Depois do mascaramento, mensagens com dado pessoal ainda detectável: **0**.
+- Depois do mascaramento, mensagens com dado pessoal ainda detectável: **{pii_residual}**.
 
 ## Auditoria de preço (vendedor × API oficial)
 
@@ -192,9 +195,15 @@ saem da camada Silver (sem dados pessoais) e de cotações feitas na API oficial
 def run(api_url: str, silver_dir: Path = SILVER_DIR, gold_dir: Path = GOLD_DIR) -> pd.DataFrame:
     conv = pd.read_parquet(silver_dir / "conversations.parquet")
     msgs = pd.read_parquet(silver_dir / "messages.parquet")
-    audit = reprice(conv, api_url)
+    summary = json.loads((silver_dir / "summary.json").read_text(encoding="utf-8"))
+    # Only conversations with everything a quote needs can be re-priced.
+    needed = ["oferta_plano", "veiculo_ano", "cep_prefixo", "idade"]
+    complete = conv.dropna(subset=needed)
+    if len(complete) < len(conv):
+        print(f"{len(conv) - len(complete)} conversas sem dados para recotar foram ignoradas")
+    audit = reprice(complete, api_url)
     gold_dir.mkdir(parents=True, exist_ok=True)
     audit.to_parquet(gold_dir / "auditoria_precos.parquet", index=False)
-    report = build_report(conv, msgs, audit)
+    report = build_report(complete, msgs, audit, pii_residual=summary["pii_residual"])
     Path("docs/achados-dataset.md").write_text(report, encoding="utf-8")
     return audit

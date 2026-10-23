@@ -66,6 +66,8 @@ class CircuitBreaker:
 
     def record_success(self) -> None:
         with self._lock:
+            if self._state == "open":
+                return  # a call that started before the circuit opened; only the probe decides
             self._probe_in_flight = False
             if self._state == "closed":
                 self._outcomes.append(False)

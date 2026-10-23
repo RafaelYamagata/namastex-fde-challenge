@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import re
 
-# 01310-100, 01310100, 01.310-100, 01310 100
-CEP_RE = re.compile(r"(?<!\d)(\d{2})\.?(\d{3})[-\s]?(\d{3})(?!\d)")
+# 01310-100, 01310100, 01.310-100, 01310 100. Not when glued to letters, digits or "_", so
+# ids such as "q_ab12345678cd" are not taken for a CEP.
+CEP_RE = re.compile(r"(?<!\w)(\d{2})\.?(\d{3})[-\s]?(\d{3})(?!\w)")
 
 
 def normalize_cep(value: str) -> str | None:

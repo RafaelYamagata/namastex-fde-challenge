@@ -89,11 +89,14 @@ FIELD_LABELS = {
 }
 
 
+def join_pt(items: list[str]) -> str:
+    """["a", "b", "c"] -> "a, b e c"."""
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " e " + items[-1]
+
+
 def ask_fields_fallback(fields: list[str]) -> str:
     """Used when the LLM is unavailable or its text was blocked."""
-    items = [FIELD_LABELS[f] for f in fields]
-    listed = items[0] if len(items) == 1 else ", ".join(items[:-1]) + " e " + items[-1]
-    return f"Pra eu calcular sua cotação, me conta {listed}?"
+    return f"Pra eu calcular sua cotação, me conta {join_pt([FIELD_LABELS[f] for f in fields])}?"
 
 
 GENERIC_FALLBACK = "Entendi! Posso te ajudar com mais alguma coisa sobre a cotação?"
@@ -103,12 +106,8 @@ def _date_br(d: dt.date) -> str:
     return d.strftime("%d/%m/%Y")
 
 
-def _join(items: list[str]) -> str:
-    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " e " + items[-1]
-
-
 def plan_block(data: dict[str, Any]) -> str:
-    coberturas = _join([COVERAGE_LABELS.get(c, c) for c in data["coberturas"]])
+    coberturas = join_pt([COVERAGE_LABELS.get(c, c) for c in data["coberturas"]])
     lines = [
         f"*{data['plano_nome']}*: {format_brl(data['premio_mensal'])}/mês",
         f"Coberturas: {coberturas}",
@@ -138,7 +137,7 @@ def present_quotes(quotes: list[QuoteRecord], lead: LeadData, *, intro: str | No
             )
     carencia = first.get("carencia") or {}
     if carencia.get("coberturas"):
-        covered = _join([COVERAGE_LABELS.get(c, c) for c in carencia["coberturas"]])
+        covered = join_pt([COVERAGE_LABELS.get(c, c) for c in carencia["coberturas"]])
         notes.append(
             f"Carência: {covered} passam a valer {carencia['dias']} dias após o início da vigência."
         )
@@ -153,7 +152,7 @@ def present_quotes(quotes: list[QuoteRecord], lead: LeadData, *, intro: str | No
 
 
 def deferred_notice(pending_plan_names: list[str], *, some_presented: bool) -> str:
-    what = "a cotação" if not some_presented else f"a cotação do {_join(pending_plan_names)}"
+    what = "a cotação" if not some_presented else f"a cotação do {join_pt(pending_plan_names)}"
     return (
         f"Nosso sistema de cotação está instável agora e não consegui calcular {what}. Não vou "
         "te passar um valor aproximado pra não te dar informação errada: assim que o sistema "
@@ -165,10 +164,10 @@ def plan_facts(catalog: PlanCatalog) -> str:
     """The facts the LLM may use when talking about plans. No prices on purpose."""
     lines = []
     for p in catalog.plans:
-        coberturas = _join([COVERAGE_LABELS.get(c, c) for c in p["coberturas"]])
+        coberturas = join_pt([COVERAGE_LABELS.get(c, c) for c in p["coberturas"]])
         lines.append(f"- {p['nome']}: {coberturas}; franquia de {format_brl(p['franquia'])}.")
     car = catalog.rules["carencia"]
-    covered = _join([COVERAGE_LABELS.get(c, c) for c in car["coberturas_com_carencia"]])
+    covered = join_pt([COVERAGE_LABELS.get(c, c) for c in car["coberturas_com_carencia"]])
     lines += [
         f"- Carência: {covered} só passam a valer {car['dias']} dias após o início da vigência.",
         "- Pagamento mensal. Se a vigência começa no meio do mês, o primeiro pagamento é "

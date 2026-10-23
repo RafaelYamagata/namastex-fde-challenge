@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import os
 import re
 import unicodedata
@@ -162,9 +163,10 @@ def run(bronze_path: Path = BRONZE_PATH, out_dir: Path = SILVER_DIR) -> dict[str
     out_dir.mkdir(parents=True, exist_ok=True)
     messages.to_parquet(out_dir / "messages.parquet", index=False)
     conversations.to_parquet(out_dir / "conversations.parquet", index=False)
-    return {
+    summary = {
         "mensagens": len(messages),
         "conversas": len(conversations),
         "pii_residual": residual_pii(messages, bronze),
-        "saida": str(out_dir),
     }
+    (out_dir / "summary.json").write_text(json.dumps(summary), encoding="utf-8")
+    return {**summary, "saida": str(out_dir)}

@@ -73,7 +73,7 @@ docker compose run --rm agent            # chat com o agente, falando com a API 
 | `uv run autoseguro bench` | Benchmark do cliente resiliente × cliente ingênuo, com a API real |
 | `uv run autoseguro data silver` | Dataset: Bronze → Silver (ordena, mascara, estrutura) |
 | `uv run autoseguro data audit` | Dataset: recota o histórico na API e gera `docs/achados-dataset.md` |
-| `uv run pytest` | 77 testes (os de integração sobem a API sozinhos; nenhum chama o LLM) |
+| `uv run pytest` | 95 testes (os de integração sobem a API sozinhos; nenhum chama o LLM) |
 
 Configuração por variável de ambiente (ver [`.env.example`](.env.example)): modelo e esforço
 do LLM (`ANTHROPIC_MODEL`, padrão `claude-sonnet-5-5`; `ANTHROPIC_EFFORT`, padrão `low`),
@@ -286,10 +286,10 @@ Relatório completo: [`docs/achados-dataset.md`](docs/achados-dataset.md).
 ### 9. Modelo e chamadas ao LLM
 
 - `claude-sonnet-5-5` com esforço `low`: turnos curtos de WhatsApp pedem latência baixa.
-  Nos cenários, a NLU levou 1,6 s (mediana) e a escrita 2,0 s. Configurável por
+  Nos cenários, a NLU levou 1,4 s (mediana) e a escrita 1,7 s. Configurável por
   `ANTHROPIC_MODEL` / `ANTHROPIC_EFFORT`.
 - NLU com saída estruturada (JSON Schema); NLG em texto livre com instruções curtas por regra.
-- System prompt fixo e em cache: 35 de 36 chamadas dos cenários leram do cache.
+- System prompt fixo e em cache: 33 de 35 chamadas dos cenários leram do cache.
 - `fallbacks: "default"` ligado: se o modelo recusar por política, a API tenta outro modelo.
 - O LLM também é uma dependência que falha: o SDK tenta de novo; se a NLU falhar, handoff
   `erro_interno`; se a escrita falhar, sai uma mensagem fixa e a conversa continua.
@@ -342,9 +342,9 @@ ai-logs/          sessões com IA exportadas
 - **Canal real:** o WhatsApp é simulado (chat e cenários). Num webhook de verdade entram
   agrupamento de rajadas por janela de tempo, deduplicação por id da mensagem e templates
   aprovados para mensagens proativas depois da janela de 24 h.
-- **Retentativas em segundo plano vivem no processo:** se o agente reiniciar, as cotações
-  pendentes se perdem (o estado da conversa não). Em produção, fila durável (SQS, Redis) com
-  worker.
+- **Retentativas em segundo plano vivem no processo:** se o agente reiniciar, a rodada em
+  andamento se perde; a cotação pendente expira no prazo e é refeita no próximo contato do lead,
+  mas a mensagem proativa não sai. Em produção, fila durável (SQS, Redis) com worker.
 - **SQLite e locks em memória** servem para uma instância. Com várias, Postgres e lock por
   conversa.
 - **Avaliação do LLM:** os cenários verificam desfechos, não a qualidade do texto. O próximo
@@ -378,3 +378,9 @@ Como o trabalho foi conduzido:
   cada conversa gravada. Isso pegou erros da própria IA: o breaker mal calibrado, o handoff
   gravado em dobro (quebrava o rastro), o prompt vazando para a saudação ("os valores chegam
   logo depois", antes de ter os dados) e o bug de fuso horário, visto só ao rodar no Docker.
+- **Revisão de código no fim** (`/code-review` do Claude Code, sobre todo o `src/`): achou 10
+  problemas reais, entre eles data de início que fica no passado de um dia para o outro (virava
+  erro interno), cotação pendente que podia ficar presa para sempre, o mesmo plano cotado duas
+  vezes, telefone fixo de 8 dígitos sobrescrevendo o CEP, id de cotação mascarado como CEP e o
+  breaker fechando com uma resposta atrasada. Todos foram corrigidos, cada um com um teste que
+  reproduz o cenário (`tests/test_edge_cases.py`).

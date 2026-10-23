@@ -1,36 +1,36 @@
-Trace da conversa conv_078482da7a81 (horários em UTC)
+Trace da conversa conv_26be99f3400a (horários em UTC)
 
-01:10:18.769  · conversation_started {"channel": "scenario", "catalog_source": "live"}
-01:10:18.769  ← lead     [text] msg_1a08854c17fe: Oi, vi o anúncio de vocês, quanto fica o seguro?
-01:10:20.573  · nlu       {"intents": ["duvida", "saudacao"]}
-01:10:20.574  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
-01:10:22.562  → agente   [llm] msg_ac26011fae6e:
-                Oi! Sou a assistente virtual da AutoSeguro 😊 O valor do seguro depende da idade do motorista, da idade do veículo e da região do CEP, então preciso de alguns dados para calcular. Para começar, qual é o modelo e o ano do seu carro?
-01:10:22.569  ← lead     [text] msg_ce57499966c8: é um Onix 2021
-01:10:26.121  · nlu       {"changed": ["veiculo_ano", "veiculo_modelo"]}
-01:10:26.124  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
-01:10:27.493  → agente   [llm] msg_49bec5506d73:
-                Anotado, Onix 2021! Para calcular, me conta qual é a idade do motorista principal, o CEP de onde o carro dorme e a partir de quando você quer o seguro?
-01:10:27.497  ← lead     [text] msg_a0113e82aa15: tenho 35 anos, cep [CEP]
-01:10:27.499  ← lead     [text] msg_273309494d00: meu cpf é [CPF] se precisar
-01:10:28.981  · nlu       {"changed": ["idade", "cep"]}
-01:10:28.983  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
-01:10:31.070  → agente   [llm] msg_6755f95f5476:
-                Obrigada pelas informações! Não precisa do CPF para a cotação, então pode ficar tranquilo. Só falta saber: a partir de quando você quer o seguro?
-01:10:31.074  ← lead     [text] msg_45aeed81ce0e: queria que começasse dia 15
-01:10:32.643  · nlu       {"changed": ["data_inicio"]}
-01:10:32.646  · decision  {"rule": "R19_cotar", "quote_plans": ["essencial", "completo", "premium"]}
-01:10:32.648  → agente   [template] msg_20280f8fd995:
+01:42:25.034  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:42:25.035  ← lead     [text] msg_387a2f4e1af5: Oi, vi o anúncio de vocês, quanto fica o seguro?
+01:42:27.226  · nlu       {"intents": ["duvida", "saudacao"]}
+01:42:27.227  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
+01:42:29.138  → agente   [llm] msg_b6ec89e284fc:
+                Oi! Sou a assistente virtual da AutoSeguro 😊 O valor varia conforme a idade do motorista, a idade do veículo e a região do CEP, então preciso de alguns dados para cotar. Para começar, qual é o modelo e o ano do seu carro?
+01:42:29.142  ← lead     [text] msg_e14264e10d37: é um Onix 2021
+01:42:30.443  · nlu       {"changed": ["veiculo_ano", "veiculo_modelo"]}
+01:42:30.446  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
+01:42:31.882  → agente   [llm] msg_b98611548ae0:
+                Anotado: Onix 2021! Para eu cotar, me conta a idade do motorista principal, o CEP de onde o carro dorme e a partir de quando você quer o seguro.
+01:42:31.887  ← lead     [text] msg_56fac0b6f220: tenho 35 anos, cep [CEP]
+01:42:31.888  ← lead     [text] msg_8c5c99f7322f: meu cpf é [CPF] se precisar
+01:42:33.166  · nlu       {"changed": ["idade", "cep"]}
+01:42:33.169  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
+01:42:34.845  → agente   [llm] msg_191926500722:
+                Obrigada pelas informações! Não precisa do CPF para a cotação, então fique tranquilo(a). Só falta me dizer: a partir de quando você quer começar o seguro?
+01:42:34.849  ← lead     [text] msg_b5df92cb85fa: queria que começasse dia 15
+01:42:36.144  · nlu       {"changed": ["data_inicio"]}
+01:42:36.147  · decision  {"rule": "R19_cotar", "quote_plans": ["essencial", "completo", "premium"]}
+01:42:36.148  → agente   [template] msg_a271f44af6e5:
                 Só um instante, estou calculando sua cotação no sistema... ⏳
-01:10:32.651  $ tentativa q_61d4b104bb2e rodada 0 #1: HTTP 500 http_500 (28 ms)
-01:10:32.657  $ tentativa q_06c7ddc2131e rodada 0 #1: HTTP 200 ok (23 ms)
-01:10:32.660  $ tentativa q_b5e253b7e5bd rodada 0 #1: HTTP --- timeout (2505 ms)
-01:10:32.817  $ tentativa q_61d4b104bb2e rodada 0 #2: HTTP 200 ok (7 ms)
-01:10:35.313  $ tentativa q_b5e253b7e5bd rodada 0 #2: HTTP 200 ok (5 ms)
-01:10:35.320  $ cotação  q_61d4b104bb2e essencial: ok R$ 155,87/mês [inline, 2 tentativa(s)]
-01:10:35.323  $ cotação  q_06c7ddc2131e completo: ok R$ 272,87/mês [inline, 1 tentativa(s)]
-01:10:35.325  $ cotação  q_b5e253b7e5bd premium: ok R$ 441,87/mês [inline, 2 tentativa(s)]
-01:10:35.329  → agente   [template] msg_f8f76002a2b6:
+01:42:36.153  $ tentativa q_b0cb2049afa9 rodada 0 #1: HTTP 200 ok (18 ms)
+01:42:36.156  $ tentativa q_f0d9af1809e5 rodada 0 #1: HTTP 500 http_500 (15 ms)
+01:42:36.157  $ tentativa q_07e967e84b0d rodada 0 #1: HTTP --- timeout (2504 ms)
+01:42:36.346  $ tentativa q_f0d9af1809e5 rodada 0 #2: HTTP 200 ok (6 ms)
+01:42:38.879  $ tentativa q_07e967e84b0d rodada 0 #2: HTTP 200 ok (8 ms)
+01:42:38.889  $ cotação  q_b0cb2049afa9 essencial: ok R$ 155,87/mês [inline, 1 tentativa(s)]
+01:42:38.895  $ cotação  q_f0d9af1809e5 completo: ok R$ 272,87/mês [inline, 2 tentativa(s)]
+01:42:38.898  $ cotação  q_07e967e84b0d premium: ok R$ 441,87/mês [inline, 2 tentativa(s)]
+01:42:38.901  → agente   [template] msg_d1c794560c42:
                 Suas cotações:
                 
                 *Essencial*: R$ 155,87/mês
@@ -52,17 +52,17 @@ Trace da conversa conv_078482da7a81 (horários em UTC)
                 
                 Qual deles faz mais sentido pra você? Posso explicar as diferenças.
                 
-                Ref.: q_61d4b104bb2e, q_06c7ddc2131e, q_b5e253b7e5bd
-01:10:35.330  · stage_changed {"from_": "coletando", "to": "cotado"}
-01:10:35.335  ← lead     [text] msg_e6e76eca48ba: qual a diferença de franquia entre eles?
-01:10:37.173  · nlu       {"intents": ["duvida"]}
-01:10:37.176  · decision  {"rule": "R21_responder", "directive": "responder"}
-01:10:39.259  → agente   [llm] msg_a847e68a4520:
+                Ref.: q_b0cb2049afa9, q_f0d9af1809e5, q_07e967e84b0d
+01:42:38.902  · stage_changed {"from_": "coletando", "to": "cotado"}
+01:42:38.905  ← lead     [text] msg_a12fe53cf178: qual a diferença de franquia entre eles?
+01:42:40.486  · nlu       {"intents": ["duvida"]}
+01:42:40.488  · decision  {"rule": "R21_responder", "directive": "responder"}
+01:42:44.065  → agente   [llm] msg_e38239aa983d:
                 A franquia é o valor que você paga em caso de sinistro com danos ao próprio carro: no Essencial é R$ 4.500,00, no Completo R$ 3.000,00 e no Premium R$ 1.500,00. Quanto menor a franquia, maior a mensalidade. Quer seguir com algum desses planos?
-01:10:39.271  ← lead     [text] msg_ff53a46fed8b: fechado, vou de completo!
-01:10:41.415  · nlu       {"intents": ["quer_fechar"], "changed": ["plano_id"]}
-01:10:41.417  · decision  {"rule": "R04_fechamento", "handoff": "fechamento"}
-01:10:41.419  ! HANDOFF  ho_008a3e3555ba motivo=fechamento prioridade=alta: Lead quer fechar o plano completo. Cotações: q_61d4b104bb2e, q_06c7ddc2131e, q_b5e253b7e5bd.
-01:10:41.420  → agente   [template] msg_d8e9c957a80f:
+01:42:44.068  ← lead     [text] msg_1109bb1806f6: fechado, vou de completo!
+01:42:45.564  · nlu       {"intents": ["quer_fechar"], "changed": ["plano_id"]}
+01:42:45.566  · decision  {"rule": "R04_fechamento", "handoff": "fechamento"}
+01:42:45.567  ! HANDOFF  ho_20f304c18105 motivo=fechamento prioridade=alta: Lead quer fechar o plano completo. Cotações: q_b0cb2049afa9, q_f0d9af1809e5, q_07e967e84b0d.
+01:42:45.569  → agente   [template] msg_74769256fb02:
                 Ótima escolha! 🎉 Para emitir a apólice, um especialista vai finalizar com você por aqui: ele confirma seus dados e envia a forma de pagamento.
-01:10:41.422  · stage_changed {"from_": "cotado", "to": "handoff"}
+01:42:45.570  · stage_changed {"from_": "cotado", "to": "handoff"}

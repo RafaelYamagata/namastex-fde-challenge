@@ -47,11 +47,11 @@ def _cpf_ok(value: str) -> bool:
 # Order is priority: when two matches overlap, the earlier pattern wins.
 _PATTERNS: list[tuple[PiiKind, re.Pattern[str], Callable[[str], bool] | None]] = [
     (PiiKind.EMAIL, re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+"), None),
-    (PiiKind.CPF, re.compile(r"(?<!\d)\d{3}[.\s]?\d{3}[.\s]?\d{3}[-\s]?\d{2}(?!\d)"), _cpf_ok),
+    (PiiKind.CPF, re.compile(r"(?<!\w)\d{3}[.\s]?\d{3}[.\s]?\d{3}[-\s]?\d{2}(?!\w)"), _cpf_ok),
     (PiiKind.CEP, CEP_RE, None),
     (
         PiiKind.TELEFONE,
-        re.compile(r"(?<!\d)(?:\+?55[\s.-]?)?(?:\(?\d{2}\)?[\s.-]?)?9?\d{4}[\s.-]?\d{4}(?!\d)"),
+        re.compile(r"(?<!\w)(?:\+?55[\s.-]?)?(?:\(?\d{2}\)?[\s.-]?)?9?\d{4}[\s.-]?\d{4}(?!\w)"),
         None,
     ),
     # Old (ABC-1234) and Mercosul (ABC1D23) plates.

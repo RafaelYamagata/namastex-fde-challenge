@@ -17,6 +17,7 @@ import datetime as dt
 import re
 import threading
 import traceback
+import weakref
 from collections import defaultdict
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -37,7 +38,7 @@ from autoseguro.agent.state import (
 )
 from autoseguro.clock import today as business_today
 from autoseguro.obs import log_event, new_id, utcnow
-from autoseguro.privacy.redact import PiiKind, redact
+from autoseguro.privacy.redact import PiiKind, PiiMatch, redact
 from autoseguro.quote import (
     PLAN_IDS,
     DeferredQuotes,
@@ -80,6 +81,15 @@ STRICT_RETRY = (
 )
 
 
+def _looks_like_cep(raw: str, match: PiiMatch) -> bool:
+    """A formatted CEP (01310-100) always counts; 8 bare digits only after the word "cep" or
+    as the whole message, otherwise an 8-digit landline would replace the lead's CEP."""
+    if not match.value.isdigit():
+        return True
+    before = raw[max(0, match.start - 20) : match.start].lower()
+    return "cep" in before or raw.strip() == match.value
+
+
 class Agent:
     def __init__(
         self,
@@ -99,7 +109,11 @@ class Agent:
         self.deferred = deferred
         self._send_cb = send or (lambda conversation_id, text: None)
         self._today = today
-        self._locks: defaultdict[str, threading.RLock] = defaultdict(threading.RLock)
+        # One lock per conversation, dropped once nobody holds it (no growth over time).
+        self._locks: weakref.WeakValueDictionary[str, threading.RLock] = (
+            weakref.WeakValueDictionary()
+        )
+        self._locks_guard = threading.Lock()
         self._nlg_system = NLG_SYSTEM + msg.plan_facts(catalog)
 
     # -- public API -----------------------------------------------------------------------
@@ -117,7 +131,7 @@ class Agent:
 
     def handle(self, conversation_id: str, raw_messages: list[str]) -> list[str]:
         """Process one turn: a burst of messages from the lead. Returns what was sent."""
-        with self._locks[conversation_id]:
+        with self._lock(conversation_id):
             state = self.store.load_state(conversation_id)
             turn, masked = self._ingest(state, raw_messages)
             try:
@@ -146,6 +160,13 @@ class Agent:
             self.store.save_state(state)
             return out
 
+    def _lock(self, conversation_id: str) -> threading.RLock:
+        with self._locks_guard:
+            lock = self._locks.get(conversation_id)
+            if lock is None:
+                lock = self._locks[conversation_id] = threading.RLock()
+            return lock
+
     # -- one turn -------------------------------------------------------------------------
     def _ingest(self, state: ConversationState, raw_messages: list[str]) -> tuple[Turn, list[str]]:
         turn, masked = Turn(), []
@@ -165,7 +186,11 @@ class Agent:
             masked.append(redaction.text)
             if kind == "text":
                 turn.texts.append(redaction.text)
-                turn.ceps.extend(redaction.values(PiiKind.CEP))
+                turn.ceps.extend(
+                    m.value
+                    for m in redaction.matches
+                    if m.kind is PiiKind.CEP and _looks_like_cep(raw, m)
+                )
             else:
                 turn.media.append(kind)
         return turn, masked
@@ -180,10 +205,11 @@ class Agent:
             state.handoff_acknowledged = True
             return [self._say(state, msg.HANDOFF_ACK, source="template")]
         if state.stage is Stage.ENCERRADO:
-            state.stage = Stage.COLETANDO
+            state.stage, state.outcome = Stage.COLETANDO, None
             self.store.event(cid, "conversation_reopened")
 
         today = self._today()
+        self._expire_stale(state, today)
         nlu = understand(self.llm, state, turn.texts, today) if turn.texts else NluResult()
         changed = apply_nlu(state, nlu, turn)
         state.transcript.extend(("lead", m) for m in masked)
@@ -211,6 +237,20 @@ class Agent:
         if state.stage is not stage_before:
             self.store.event(cid, "stage_changed", from_=stage_before, to=state.stage)
         return out
+
+    def _expire_stale(self, state: ConversationState, today: dt.date) -> None:
+        """Drop what time made invalid: a start date now in the past (the lead is asked again;
+        quotes with the old date stop counting) and background quotes past their deadline
+        (e.g. the process restarted and the retry thread is gone; the quote is redone)."""
+        cid = state.conversation_id
+        if state.data.data_inicio and state.data.data_inicio < today:
+            self.store.event(cid, "data_inicio_expired", data_inicio=state.data.data_inicio)
+            state.data.data_inicio, state.data_inicio_expirou = None, True
+        deadline = utcnow() - dt.timedelta(seconds=self.deferred.max_duration_s())
+        for q in state.quotes.values():
+            if q.status == "pending" and q.requested_at and q.requested_at < deadline.isoformat():
+                q.status, q.detail = "unavailable", "pending_expired"
+                self.store.event(cid, "quote_pending_expired", quote_id=q.quote_id)
 
     def _execute(self, state: ConversationState, decision: Decision) -> list[str]:
         if decision.handoff:
@@ -257,28 +297,21 @@ class Agent:
             self.store.record_quote(cid, result, mode="inline")
             self.store.record_attempts(cid, result, round_no=0)
             state.quotes[result.quote_id] = QuoteRecord(
-                result.quote_id, plan, fingerprint, result.status.value, result.data, result.detail
+                result.quote_id,
+                plan,
+                fingerprint,
+                result.status.value,
+                result.data,
+                result.detail,
+                requested_at=utcnow().isoformat(),
             )
 
         by_status = defaultdict(list)
         for result in results.values():
             by_status[result.status].append(result)
-        if by_status[QuoteStatus.REFUSED]:
-            refused = by_status[QuoteStatus.REFUSED][0]
-            return self._handoff(
-                state,
-                HandoffReason.INELEGIVEL,
-                f"API recusou a cotação {refused.quote_id}: {refused.detail}",
-                rule="R15b_recusa_da_api",
-            )
-        if by_status[QuoteStatus.INVALID]:
-            invalid = by_status[QuoteStatus.INVALID][0]
-            return self._handoff(
-                state,
-                HandoffReason.ERRO_INTERNO,
-                f"API rejeitou o payload da cotação {invalid.quote_id}: {invalid.detail}",
-                rule="R00_payload_invalido",
-            )
+        for status in (QuoteStatus.REFUSED, QuoteStatus.INVALID):
+            if by_status[status]:
+                return self._handoff_for_answer(state, by_status[status][0])
 
         out = []
         current = state.current_quotes()
@@ -320,63 +353,75 @@ class Agent:
         self.store.record_attempts(cid, result, round_no=round_no)
 
     def _on_deferred_done(self, cid: str, result: QuoteResult) -> None:
-        with self._locks[cid]:
+        with self._lock(cid):
             state = self.store.load_state(cid)
             stage_before = state.stage
-            self.store.record_quote(cid, result, mode="deferred")
-            record = state.quotes[result.quote_id]
-            record.status, record.data, record.detail = (
-                result.status.value,
-                result.data,
-                result.detail,
-            )
-            stale = record.fingerprint != state.data.fingerprint()
-            if state.stage is Stage.HANDOFF or stale:
+            try:
+                self._deliver_deferred(state, result)
+            except Exception as exc:  # never leave the record stuck as "pending"
                 self.store.event(
-                    cid,
-                    "deferred_result_not_sent",
-                    quote_id=result.quote_id,
-                    status=result.status,
-                    reason="handoff" if not stale else "stale",
+                    cid, "internal_error", error=repr(exc), traceback=traceback.format_exc(limit=5)
                 )
-            elif result.status is QuoteStatus.OK:
-                self._present(
-                    state, [record], intro="Saiu! Aqui está a cotação que estava pendente:"
-                )
-            elif result.status is QuoteStatus.REFUSED:
-                self._handoff(
-                    state,
-                    HandoffReason.INELEGIVEL,
-                    f"API recusou a cotação {result.quote_id}: {result.detail}",
-                    rule="R15b_recusa_da_api",
-                )
-            elif result.status is QuoteStatus.INVALID:
-                self._handoff(
-                    state,
-                    HandoffReason.ERRO_INTERNO,
-                    f"API rejeitou o payload da cotação {result.quote_id}",
-                    rule="R00_payload_invalido",
-                )
-            elif state.current_quotes():
-                plan = self.catalog.plan(record.plano_id)["nome"]
-                self._say(
-                    state,
-                    f"Não consegui calcular o plano {plan} agora. Se ele te "
-                    "interessar, me avisa que eu chamo um especialista pra te passar o "
-                    "valor.",
-                    source="template",
-                )
-            else:
-                self._handoff(
-                    state,
-                    HandoffReason.COTACAO_INDISPONIVEL,
-                    f"Cotação {result.quote_id} sem resposta da API após as "
-                    "tentativas em segundo plano.",
-                    rule="R23_cotacao_indisponivel",
-                )
-            if state.stage is not stage_before:
-                self.store.event(cid, "stage_changed", from_=stage_before, to=state.stage)
-            self.store.save_state(state)
+            finally:
+                if state.stage is not stage_before:
+                    self.store.event(cid, "stage_changed", from_=stage_before, to=state.stage)
+                self.store.save_state(state)
+
+    def _deliver_deferred(self, state: ConversationState, result: QuoteResult) -> None:
+        cid = state.conversation_id
+        self.store.record_quote(cid, result, mode="deferred")
+        record = state.quotes[result.quote_id]
+        record.status, record.data, record.detail = result.status.value, result.data, result.detail
+        if record.fingerprint != state.data.fingerprint():
+            skip = "stale"
+        elif state.stage in (Stage.HANDOFF, Stage.ENCERRADO):
+            skip = state.stage.value
+        else:
+            skip = None
+        if skip:
+            self.store.event(
+                cid,
+                "deferred_result_not_sent",
+                quote_id=result.quote_id,
+                status=result.status,
+                reason=skip,
+            )
+        elif result.status is QuoteStatus.OK:
+            self._present(state, [record], intro="Saiu! Aqui está a cotação que estava pendente:")
+        elif result.status in (QuoteStatus.REFUSED, QuoteStatus.INVALID):
+            self._handoff_for_answer(state, result)
+        elif state.current_quotes():
+            plan = self.catalog.plan(record.plano_id)["nome"]
+            self._say(
+                state,
+                f"Não consegui calcular o plano {plan} agora. Se ele te interessar, me avisa "
+                "que eu chamo um especialista pra te passar o valor.",
+                source="template",
+            )
+        else:
+            self._handoff(
+                state,
+                HandoffReason.COTACAO_INDISPONIVEL,
+                f"Cotação {result.quote_id} sem resposta da API após as tentativas em segundo "
+                "plano.",
+                rule="R23_cotacao_indisponivel",
+            )
+
+    def _handoff_for_answer(self, state: ConversationState, result: QuoteResult) -> list[str]:
+        """The API answered, but not with a price: a refusal or a rejected payload."""
+        if result.status is QuoteStatus.REFUSED:
+            return self._handoff(
+                state,
+                HandoffReason.INELEGIVEL,
+                f"API recusou a cotação {result.quote_id}: {result.detail}",
+                rule="R15b_recusa_da_api",
+            )
+        return self._handoff(
+            state,
+            HandoffReason.ERRO_INTERNO,
+            f"API rejeitou o payload da cotação {result.quote_id}: {result.detail}",
+            rule="R00_payload_invalido",
+        )
 
     # -- handoff --------------------------------------------------------------------------
     def _handoff(
@@ -496,6 +541,11 @@ class Agent:
             text = check.text
         if check.pii_masked:
             self.store.event(state.conversation_id, "outbound_pii_masked", kinds=check.pii_masked)
+        try:
+            self._send_cb(state.conversation_id, text)
+        except Exception as exc:  # a channel failure must not lose the turn's state
+            status = "delivery_failed"
+            self.store.event(state.conversation_id, "delivery_failed", error=repr(exc))
         message_id = self.store.add_message(
             state.conversation_id, "out", "text", text, status, source=source, **meta
         )
@@ -504,8 +554,8 @@ class Agent:
             conversation_id=state.conversation_id,
             message_id=message_id,
             source=source,
+            status=status,
         )
         state.transcript.append(("agente", text))
         state.greeted = True
-        self._send_cb(state.conversation_id, text)
         return text

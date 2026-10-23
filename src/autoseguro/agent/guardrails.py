@@ -16,8 +16,17 @@ from autoseguro.agent.state import ConversationState
 from autoseguro.privacy.redact import PiiKind, find_pii, mask
 from autoseguro.quote.catalog import PlanCatalog
 
-# "R$ 1.234,56", "R$ 219,90", "R$219", and bare "219,90" (a price without the symbol).
-MONEY_RE = re.compile(r"R\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+(?:,\d{1,2})?)|\b(\d+,\d{2})\b")
+# Ways an amount can be written: "R$ 1.234,56", "R$ 4500", "219,90" or "219,9" without the
+# symbol, "219 reais", "219 por mês" / "219/mês".
+_NUMBER = r"(\d+(?:\.\d{3})*(?:,\d{1,2})?)"
+MONEY_PATTERNS = [
+    re.compile(rf"R\$\s*{_NUMBER}"),
+    re.compile(r"(?<![\w.,])(\d+(?:\.\d{3})*,\d{1,2})(?![\w,])"),
+    re.compile(rf"(?<![\w.,]){_NUMBER}\s*(?:reais|real)\b", re.IGNORECASE),
+    re.compile(
+        rf"(?<![\w.,]){_NUMBER}\s*(?:/\s*m[eê]s|por\s+m[eê]s|ao\s+m[eê]s|mensais)", re.IGNORECASE
+    ),
+]
 
 
 def _to_float(text: str) -> float:
@@ -37,11 +46,14 @@ def allowed_amounts(state: ConversationState, catalog: PlanCatalog) -> set[float
 
 
 def unbacked_amounts(text: str, allowed: set[float]) -> list[str]:
-    bad = []
-    for m in MONEY_RE.finditer(text):
-        raw = m.group(1) or m.group(2)
-        if not any(abs(_to_float(raw) - a) < 0.005 for a in allowed):
-            bad.append(m.group(0))
+    bad, seen = [], set()
+    for pattern in MONEY_PATTERNS:
+        for m in pattern.finditer(text):
+            if m.start(1) in seen:  # the same number caught by two patterns
+                continue
+            seen.add(m.start(1))
+            if not any(abs(_to_float(m.group(1)) - a) < 0.005 for a in allowed):
+                bad.append(m.group(0))
     return bad
 
 

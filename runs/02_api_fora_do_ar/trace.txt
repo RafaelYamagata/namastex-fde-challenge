@@ -1,45 +1,43 @@
-Trace da conversa conv_50030ab30392 (horários em UTC)
+Trace da conversa conv_05947ae321b4 (horários em UTC)
 
-01:10:42.164  · conversation_started {"channel": "scenario", "catalog_source": "live"}
-01:10:42.165  ← lead     [text] msg_8eaf7a8702ad: boa tarde, quero uma cotação pro meu HB20 2019
-01:10:44.038  · nlu       {"intents": ["saudacao"], "changed": ["veiculo_ano", "veiculo_modelo"]}
-01:10:44.040  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
-01:10:45.736  → agente   [llm] msg_553af571c527:
+01:42:46.295  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:42:46.296  ← lead     [text] msg_461caf5ea265: boa tarde, quero uma cotação pro meu HB20 2019
+01:42:47.848  · nlu       {"intents": ["saudacao"], "changed": ["veiculo_ano", "veiculo_modelo"]}
+01:42:47.851  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
+01:42:49.909  → agente   [llm] msg_71ca6f5d655a:
                 Boa tarde! Sou a assistente virtual da AutoSeguro e vou te ajudar com a cotação do seu HB20 2019 🙂 Para começar, me conta a idade do motorista principal, o CEP de onde o carro dorme e a partir de quando você quer o seguro.
-01:10:45.740  ← lead     [text] msg_028b35f7ecc4: 42 anos, cep [CEP], pode começar hoje
-01:10:47.311  · nlu       {"changed": ["idade", "data_inicio", "cep"]}
-01:10:47.313  · decision  {"rule": "R19_cotar", "quote_plans": ["essencial", "completo", "premium"]}
-01:10:47.315  → agente   [template] msg_1a7c6381a338:
+01:42:49.912  ← lead     [text] msg_35c56282c0d0: 42 anos, cep [CEP], pode começar hoje
+01:42:51.253  · nlu       {"changed": ["idade", "data_inicio", "cep"]}
+01:42:51.255  · decision  {"rule": "R19_cotar", "quote_plans": ["essencial", "completo", "premium"]}
+01:42:51.257  → agente   [template] msg_fe714f01bc5b:
                 Só um instante, estou calculando sua cotação no sistema... ⏳
-01:10:47.317  $ tentativa q_dea85f4d1aa9 rodada 0 #1: HTTP 500 http_500 (11 ms)
-01:10:47.319  $ tentativa q_d93bed5579a5 rodada 0 #1: HTTP 502 http_502 (10 ms)
-01:10:47.319  $ tentativa q_a2d77a0eb96b rodada 0 #1: HTTP 502 http_502 (9 ms)
-01:10:47.368  $ tentativa q_d93bed5579a5 rodada 0 #2: HTTP 500 http_500 (5 ms)
-01:10:47.378  $ tentativa q_a2d77a0eb96b rodada 0 #2: HTTP 503 http_503 (3 ms)
-01:10:47.446  $ tentativa q_d93bed5579a5 rodada 0 #3: HTTP 500 http_500 (4 ms)
-01:10:47.476  $ tentativa q_a2d77a0eb96b rodada 0 #3: HTTP 502 http_502 (3 ms)
-01:10:47.548  $ tentativa q_dea85f4d1aa9 rodada 0 #2: HTTP 503 http_503 (5 ms)
-01:10:47.558  $ tentativa q_a2d77a0eb96b rodada 0 #4: HTTP 500 http_500 (3 ms)
-01:10:47.689  $ tentativa q_dea85f4d1aa9 rodada 0 #3: HTTP 502 http_502 (5 ms)
-01:10:48.307  $ cotação  q_dea85f4d1aa9 essencial: unavailable (circuit_open) [inline, 3 tentativa(s)]
-01:10:48.314  $ cotação  q_d93bed5579a5 completo: unavailable (circuit_open) [inline, 3 tentativa(s)]
-01:10:48.317  $ cotação  q_a2d77a0eb96b premium: unavailable (http_500) [inline, 4 tentativa(s)]
-01:10:48.322  · quote_deferred {"quote_ids": ["q_dea85f4d1aa9", "q_d93bed5579a5", "q_a2d77a0eb96b"]}
-01:10:48.323  → agente   [template] msg_0c7bde1d5843:
+01:42:51.259  $ tentativa q_39dcf312edf4 rodada 0 #1: HTTP 502 http_502 (9 ms)
+01:42:51.260  $ tentativa q_50bb245e22d6 rodada 0 #1: HTTP 503 http_503 (7 ms)
+01:42:51.261  $ tentativa q_ce831ef24d4b rodada 0 #1: HTTP 500 http_500 (8 ms)
+01:42:51.312  $ tentativa q_39dcf312edf4 rodada 0 #2: HTTP 502 http_502 (3 ms)
+01:42:51.363  $ tentativa q_39dcf312edf4 rodada 0 #3: HTTP 502 http_502 (2 ms)
+01:42:51.367  $ tentativa q_39dcf312edf4 rodada 0 #4: HTTP 500 http_500 (2 ms)
+01:42:51.417  $ tentativa q_50bb245e22d6 rodada 0 #2: HTTP 500 http_500 (5 ms)
+01:42:51.462  $ tentativa q_ce831ef24d4b rodada 0 #2: HTTP 503 http_503 (4 ms)
+01:42:51.735  $ tentativa q_50bb245e22d6 rodada 0 #3: HTTP 500 http_500 (4 ms)
+01:42:51.846  $ tentativa q_50bb245e22d6 rodada 0 #4: HTTP 502 http_502 (4 ms)
+01:42:51.934  $ cotação  q_39dcf312edf4 essencial: unavailable (http_500) [inline, 4 tentativa(s)]
+01:42:51.940  $ cotação  q_50bb245e22d6 completo: unavailable (http_502) [inline, 4 tentativa(s)]
+01:42:51.946  $ cotação  q_ce831ef24d4b premium: unavailable (circuit_open) [inline, 2 tentativa(s)]
+01:42:51.949  · quote_deferred {"quote_ids": ["q_39dcf312edf4", "q_50bb245e22d6", "q_ce831ef24d4b"]}
+01:42:51.951  → agente   [template] msg_ad247c816996:
                 Nosso sistema de cotação está instável agora e não consegui calcular a cotação. Não vou te passar um valor aproximado pra não te dar informação errada: assim que o sistema responder, te mando o valor certinho aqui.
-01:10:48.324  · stage_changed {"from_": "coletando", "to": "aguardando_cotacao"}
-01:10:48.328  ← lead     [text] msg_4bf1695f37fd: e aí, conseguiu?
-01:10:49.747  · nlu       {"intents": ["reenviar_cotacao"]}
-01:10:49.748  · decision  {"rule": "R16_cotacao_pendente", "directive": "pendente"}
-01:10:52.453  → agente   [llm] msg_ae67efa37e73:
-                Ainda não, a cotação continua sendo calculada. Assim que o sistema responder, ela chega aqui na conversa, certinho com os dados do seu HB20 2019. Obrigada pela paciência! 🙂
-01:11:09.338  $ tentativa q_a2d77a0eb96b rodada 3 #1: HTTP 500 http_500 (17 ms)
-01:11:09.348  $ cotação  q_d93bed5579a5 completo: unavailable (circuit_open) [deferred, 0 tentativa(s)]
-01:11:09.351  ! HANDOFF  ho_7f66f7631467 motivo=cotacao_indisponivel prioridade=alta: Cotação q_d93bed5579a5 sem resposta da API após as tentativas em segundo plano.
-01:11:09.353  → agente   [template] msg_11c0646f8d5b:
+01:42:51.952  · stage_changed {"from_": "coletando", "to": "aguardando_cotacao"}
+01:42:51.954  ← lead     [text] msg_8b5d90ae8e5f: e aí, conseguiu?
+01:42:53.208  · nlu       {"intents": ["reenviar_cotacao"]}
+01:42:53.210  · decision  {"rule": "R20_reapresentar", "present_plans": ["essencial", "completo", "premium"]}
+01:43:12.963  $ tentativa q_ce831ef24d4b rodada 3 #1: HTTP 503 http_503 (20 ms)
+01:43:12.969  $ cotação  q_50bb245e22d6 completo: unavailable (circuit_open) [deferred, 0 tentativa(s)]
+01:43:12.971  ! HANDOFF  ho_b003a01a098c motivo=cotacao_indisponivel prioridade=alta: Cotação q_50bb245e22d6 sem resposta da API após as tentativas em segundo plano.
+01:43:12.976  → agente   [template] msg_c6c8967cc5c1:
                 Nosso sistema de cotação continua instável e não quero te deixar esperando. Passei seu pedido para um especialista, que te envia os valores por aqui.
-01:11:09.354  · stage_changed {"from_": "aguardando_cotacao", "to": "handoff"}
-01:11:09.359  $ cotação  q_dea85f4d1aa9 essencial: unavailable (circuit_open) [deferred, 0 tentativa(s)]
-01:11:09.360  · deferred_result_not_sent {"quote_id": "q_dea85f4d1aa9", "status": "unavailable", "reason": "handoff"}
-01:11:09.436  $ cotação  q_a2d77a0eb96b premium: unavailable (circuit_open) [deferred, 1 tentativa(s)]
-01:11:09.437  · deferred_result_not_sent {"quote_id": "q_a2d77a0eb96b", "status": "unavailable", "reason": "handoff"}
+01:43:12.978  · stage_changed {"from_": "aguardando_cotacao", "to": "handoff"}
+01:43:12.984  $ cotação  q_39dcf312edf4 essencial: unavailable (circuit_open) [deferred, 0 tentativa(s)]
+01:43:12.985  · deferred_result_not_sent {"quote_id": "q_39dcf312edf4", "status": "unavailable", "reason": "handoff"}
+01:43:12.997  $ cotação  q_ce831ef24d4b premium: unavailable (circuit_open) [deferred, 1 tentativa(s)]
+01:43:12.998  · deferred_result_not_sent {"quote_id": "q_ce831ef24d4b", "status": "unavailable", "reason": "handoff"}

@@ -53,8 +53,14 @@ class DeferredQuotes:
         self._threads[quote_id] = thread
         thread.start()
 
+    def max_duration_s(self) -> float:
+        """Upper bound for one background quote: waits plus a full inline budget per round.
+        A record still pending after this is stuck (e.g. the process restarted)."""
+        deadline = getattr(getattr(self._client, "policy", None), "deadline_s", 12.0)
+        return sum(self._schedule) + len(self._schedule) * deadline + 30
+
     def pending(self) -> list[str]:
-        return [qid for qid, t in self._threads.items() if t.is_alive()]
+        return list(self._threads)
 
     def wait(self, timeout: float | None = None) -> None:
         for thread in list(self._threads.values()):
@@ -72,23 +78,47 @@ class DeferredQuotes:
         on_round: Callable[[QuoteResult, int], None] | None,
     ) -> None:
         result: QuoteResult | None = None
-        for round_no, delay in enumerate(self._schedule, start=1):
-            if self._stop.wait(delay):
-                log_event("quote_deferred_cancelled", quote_id=quote_id, round=round_no)
-                return
-            result = self._client.quote(
-                request, quote_id=quote_id, conversation_id=conversation_id, round_no=round_no
+        try:
+            for round_no, delay in enumerate(self._schedule, start=1):
+                if self._stop.wait(delay):
+                    log_event("quote_deferred_cancelled", quote_id=quote_id, round=round_no)
+                    return
+                try:
+                    result = self._client.quote(
+                        request,
+                        quote_id=quote_id,
+                        conversation_id=conversation_id,
+                        round_no=round_no,
+                    )
+                except Exception as exc:  # a bug must not end the retries silently
+                    log_event("quote_deferred_error", quote_id=quote_id, error=repr(exc))
+                    result = QuoteResult(
+                        quote_id=quote_id,
+                        request=request,
+                        status=QuoteStatus.UNAVAILABLE,
+                        detail=repr(exc),
+                    )
+                if on_round is not None:
+                    _safely(on_round, result, round_no, quote_id=quote_id)
+                if result.status is not QuoteStatus.UNAVAILABLE:
+                    break
+            if result is None:  # empty schedule
+                result = QuoteResult(
+                    quote_id=quote_id, request=request, status=QuoteStatus.UNAVAILABLE
+                )
+            log_event(
+                "quote_deferred_done",
+                quote_id=quote_id,
+                conversation_id=conversation_id,
+                status=result.status,
             )
-            if on_round is not None:
-                on_round(result, round_no)
-            if result.status is not QuoteStatus.UNAVAILABLE:
-                break
-        if result is None:  # empty schedule
-            result = QuoteResult(quote_id=quote_id, request=request, status=QuoteStatus.UNAVAILABLE)
-        log_event(
-            "quote_deferred_done",
-            quote_id=quote_id,
-            conversation_id=conversation_id,
-            status=result.status,
-        )
-        on_done(result)
+            _safely(on_done, result, quote_id=quote_id)
+        finally:
+            self._threads.pop(quote_id, None)
+
+
+def _safely(callback: Callable[..., None], *args: object, quote_id: str) -> None:
+    try:
+        callback(*args)
+    except Exception as exc:
+        log_event("quote_deferred_callback_error", quote_id=quote_id, error=repr(exc))

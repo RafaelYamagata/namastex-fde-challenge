@@ -1,4 +1,4 @@
-{"ts": "2026-10-23T01:11:54.978+00:00", "level": "info", "event": "conversation_started", "conversation_id": "conv_430f07b95036", "channel": "scenario"}
-{"ts": "2026-10-23T01:11:56.534+00:00", "level": "info", "event": "llm_call", "conversation_id": "conv_430f07b95036", "purpose": "nlu", "model": "claude-sonnet-5-5", "request_id": "req_011CgJHAMtdCcnGWrR2B5qNw", "stop_reason": "end_turn", "latency_ms": 1554, "input_tokens": 147, "output_tokens": 84, "cache_read_tokens": 1958}
-{"ts": "2026-10-23T01:11:56.538+00:00", "level": "info", "event": "handoff", "conversation_id": "conv_430f07b95036", "handoff_id": "ho_d7d438dde038", "reason": "fora_de_escopo", "priority": "normal"}
-{"ts": "2026-10-23T01:11:56.538+00:00", "level": "info", "event": "message_sent", "conversation_id": "conv_430f07b95036", "message_id": "msg_787b5c7d2969", "source": "template"}
+{"ts": "2026-10-23T01:43:55.970+00:00", "level": "info", "event": "conversation_started", "conversation_id": "conv_bcb5802de472", "channel": "scenario"}
+{"ts": "2026-10-23T01:43:57.479+00:00", "level": "info", "event": "llm_call", "conversation_id": "conv_bcb5802de472", "purpose": "nlu", "model": "claude-sonnet-5-5", "request_id": "req_011CgJKbxp1sDDaWUAhLXxrN", "stop_reason": "end_turn", "latency_ms": 1508, "input_tokens": 147, "output_tokens": 84, "cache_read_tokens": 1958}
+{"ts": "2026-10-23T01:43:57.487+00:00", "level": "info", "event": "handoff", "conversation_id": "conv_bcb5802de472", "handoff_id": "ho_7decbac0edf8", "reason": "fora_de_escopo", "priority": "normal"}
+{"ts": "2026-10-23T01:43:57.489+00:00", "level": "info", "event": "message_sent", "conversation_id": "conv_bcb5802de472", "message_id": "msg_df17b8aff428", "source": "template", "status": "sent"}

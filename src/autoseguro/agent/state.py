@@ -96,6 +96,7 @@ class QuoteRecord:
     data: dict[str, Any] | None = None
     detail: str | None = None
     deferred: bool = False
+    requested_at: str | None = None  # ISO timestamp (UTC): pending quotes expire
 
 
 @dataclass
@@ -123,6 +124,7 @@ class ConversationState:
     handoff: HandoffRecord | None = None
     handoff_acknowledged: bool = False
     outcome: str | None = None
+    data_inicio_expirou: bool = False  # the start date the lead gave is now in the past
     transcript: list[tuple[str, str]] = field(default_factory=list)  # (role, masked text)
 
     def current_quotes(self) -> dict[str, QuoteRecord]:
@@ -133,7 +135,9 @@ class ConversationState:
         }
 
     def pending_quotes(self) -> list[QuoteRecord]:
-        return [q for q in self.quotes.values() if q.status == "pending"]
+        """Quotes still being retried in the background for the lead's current data."""
+        fp = self.data.fingerprint()
+        return [q for q in self.quotes.values() if q.status == "pending" and q.fingerprint == fp]
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False, default=_default)

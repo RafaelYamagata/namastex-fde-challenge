@@ -1,10 +1,10 @@
-Trace da conversa conv_430f07b95036 (horários em UTC)
+Trace da conversa conv_bcb5802de472 (horários em UTC)
 
-01:11:54.977  · conversation_started {"channel": "scenario", "catalog_source": "live"}
-01:11:54.979  ← lead     [text] msg_1da637260fc8: bati o carro ontem, como faço pra acionar o seguro?
-01:11:56.534  · nlu       {"intents": ["fora_de_escopo"]}
-01:11:56.536  · decision  {"rule": "R03_fora_de_escopo", "handoff": "fora_de_escopo"}
-01:11:56.537  ! HANDOFF  ho_d7d438dde038 motivo=fora_de_escopo prioridade=normal: Assunto fora de cotação de seguro auto.
-01:11:56.538  → agente   [template] msg_787b5c7d2969:
+01:43:55.969  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:43:55.970  ← lead     [text] msg_3efc99027451: bati o carro ontem, como faço pra acionar o seguro?
+01:43:57.479  · nlu       {"intents": ["fora_de_escopo"]}
+01:43:57.482  · decision  {"rule": "R03_fora_de_escopo", "handoff": "fora_de_escopo"}
+01:43:57.485  ! HANDOFF  ho_7decbac0edf8 motivo=fora_de_escopo prioridade=normal: Assunto fora de cotação de seguro auto.
+01:43:57.487  → agente   [template] msg_df17b8aff428:
                 Esse assunto é tratado por outro time. Já encaminhei para um especialista, que te responde por aqui.
-01:11:56.539  · stage_changed {"from_": "coletando", "to": "handoff"}
+01:43:57.490  · stage_changed {"from_": "coletando", "to": "handoff"}

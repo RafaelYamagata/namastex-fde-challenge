@@ -13,7 +13,7 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import dataclass, field
 
-from autoseguro.agent.messages import FIELD_LABELS
+from autoseguro.agent.messages import FIELD_LABELS, join_pt
 from autoseguro.agent.nlu import NluResult
 from autoseguro.agent.state import ConversationState, HandoffReason, Intent, Stage
 from autoseguro.br_formats import normalize_cep
@@ -108,8 +108,7 @@ def _same(pending: dict | None, found: dict) -> bool:
 
 
 def _ask(fields: list[str]) -> str:
-    items = [FIELD_LABELS[f] for f in fields]
-    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " e " + items[-1]
+    return join_pt([FIELD_LABELS[f] for f in fields])
 
 
 def decide(
@@ -304,17 +303,6 @@ def decide(
     if state.stage is Stage.CONFIRMANDO:  # the lead corrected the datum
         state.stage, state.pending_confirmation = Stage.COLETANDO, None
 
-    # --- Quotes in the background -------------------------------------------------------
-    if state.pending_quotes() and not changed:
-        return Decision(
-            "R16_cotacao_pendente",
-            Directive(
-                "pendente",
-                "Diga que a cotação ainda está sendo calculada e que ela chega aqui "
-                f"assim que o sistema responder.{answer}",
-            ),
-        )
-
     # --- Collecting what the quote needs ----------------------------------------------
     missing = state.data.missing_for_quote()
     if missing:
@@ -330,6 +318,9 @@ def decide(
             )
         ask = missing[:1] if missing[0] == "veiculo_ano" else missing
         extra = " O CEP que ele mandou não tem 8 dígitos: peça de novo." if nlu.cep_invalido else ""
+        if state.data_inicio_expirou and "data_inicio" in missing:
+            extra += " A data de início que ele tinha passado já ficou para trás: peça uma nova."
+        state.data_inicio_expirou = False
         state.stage = Stage.COLETANDO
         return Decision(
             "R18_coletar_dados",
@@ -349,7 +340,9 @@ def decide(
     )
     if quotes and Intent.OUTRO_PLANO in intents and not nlu.plano_id:
         wanted = [p for p in PLAN_IDS if p not in quotes] or list(quotes)
-    to_quote = [p for p in wanted if p not in quotes]
+    # A plan already being retried in the background is not quoted again.
+    pending = {q.plano_id for q in state.pending_quotes()}
+    to_quote = [p for p in wanted if p not in quotes and p not in pending]
     if to_quote:
         directive = Directive("antes_da_cotacao", answer.strip()) if answer else None
         return Decision(
@@ -357,6 +350,15 @@ def decide(
             directive,
             quote_plans=to_quote,
             present_plans=[p for p in wanted if p in quotes],
+        )
+    if pending and not intents & {Intent.REENVIAR_COTACAO, Intent.OUTRO_PLANO}:
+        return Decision(
+            "R16_cotacao_pendente",
+            Directive(
+                "pendente",
+                "Diga que a cotação ainda está sendo calculada e que ela chega aqui "
+                f"assim que o sistema responder.{answer}",
+            ),
         )
 
     if intents & {Intent.REENVIAR_COTACAO, Intent.OUTRO_PLANO}:
