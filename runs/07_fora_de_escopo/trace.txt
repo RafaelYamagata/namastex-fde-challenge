@@ -1,0 +1,10 @@
+Trace da conversa conv_430f07b95036 (horários em UTC)
+
+01:11:54.977  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:11:54.979  ← lead     [text] msg_1da637260fc8: bati o carro ontem, como faço pra acionar o seguro?
+01:11:56.534  · nlu       {"intents": ["fora_de_escopo"]}
+01:11:56.536  · decision  {"rule": "R03_fora_de_escopo", "handoff": "fora_de_escopo"}
+01:11:56.537  ! HANDOFF  ho_d7d438dde038 motivo=fora_de_escopo prioridade=normal: Assunto fora de cotação de seguro auto.
+01:11:56.538  → agente   [template] msg_787b5c7d2969:
+                Esse assunto é tratado por outro time. Já encaminhei para um especialista, que te responde por aqui.
+01:11:56.539  · stage_changed {"from_": "coletando", "to": "handoff"}

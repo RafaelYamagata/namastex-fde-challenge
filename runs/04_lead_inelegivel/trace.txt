@@ -1,0 +1,26 @@
+Trace da conversa conv_06320fe337ae (horários em UTC)
+
+01:11:25.691  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:11:25.692  ← lead     [text] msg_9d5dacc1e6d0: Olá, quero fazer o seguro do meu Compass 2022
+01:11:27.254  · nlu       {"intents": ["saudacao"], "changed": ["veiculo_ano", "veiculo_modelo"]}
+01:11:27.256  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
+01:11:28.838  → agente   [llm] msg_731ba86e6fae:
+                Olá! Sou a assistente virtual da AutoSeguro, e vou te ajudar a cotar o seguro do seu Compass 2022 🚗 Para começar, me conta: qual a idade do motorista principal e o CEP de onde o carro dorme? Também preciso saber a partir de quando você quer o seguro.
+01:11:28.842  ← lead     [text] msg_0dcd574b4bad: tenho 78 anos
+01:11:30.663  · nlu       {"changed": ["idade"]}
+01:11:30.665  · decision  {"rule": "R13_confirmar_dado", "directive": "confirmar"}
+01:11:33.089  → agente   [llm] msg_110ea7027e87:
+                Obrigada! Só para confirmar: o motorista principal tem 78 anos, certo? Se estiver certo, pode me passar também o CEP de onde o carro dorme e a data em que você quer começar o seguro.
+01:11:33.091  · stage_changed {"from_": "coletando", "to": "confirmando"}
+01:11:33.094  ← lead     [text] msg_56b7736c16b6: sim, 78
+01:11:34.824  · nlu       {"intents": ["confirma"]}
+01:11:34.826  · decision  {"rule": "R14_dados_para_especialista", "directive": "dados_especialista"}
+01:11:36.215  → agente   [llm] msg_286e65f54546:
+                Perfeito, obrigada por confirmar! Agora preciso só do CEP de onde o Compass dorme para seguir com a cotação. Pode me enviar?
+01:11:36.219  ← lead     [text] msg_e9681c553301: [CEP]
+01:11:37.658  · nlu       {"changed": ["cep"]}
+01:11:37.661  · decision  {"rule": "R15_inelegivel", "handoff": "inelegivel"}
+01:11:37.663  ! HANDOFF  ho_a6090b7c930a motivo=inelegivel prioridade=normal: idade_recusada: Idade acima do limite de aceitacao (75 anos). (idade = 78).
+01:11:37.665  → agente   [template] msg_4436ba117b25:
+                Para o seu perfil, a cotação é feita por um especialista da nossa equipe. Já passei seus dados e ele te chama por aqui em breve.
+01:11:37.667  · stage_changed {"from_": "confirmando", "to": "handoff"}

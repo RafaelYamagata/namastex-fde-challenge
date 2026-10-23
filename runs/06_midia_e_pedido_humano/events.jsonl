@@ -1,0 +1,7 @@
+{"ts": "2026-10-23T01:11:48.877+00:00", "level": "info", "event": "conversation_started", "conversation_id": "conv_df5a00ea79ad", "channel": "scenario"}
+{"ts": "2026-10-23T01:11:52.919+00:00", "level": "info", "event": "llm_call", "conversation_id": "conv_df5a00ea79ad", "purpose": "nlg", "model": "claude-sonnet-5-5", "request_id": "req_011CgJH9uaqWQUDRmgVb5xWm", "stop_reason": "end_turn", "latency_ms": 4039, "input_tokens": 179, "output_tokens": 101, "cache_read_tokens": 869}
+{"ts": "2026-10-23T01:11:52.922+00:00", "level": "info", "event": "message_sent", "conversation_id": "conv_df5a00ea79ad", "message_id": "msg_cc1f0894e51c", "source": "llm"}
+{"ts": "2026-10-23T01:11:54.286+00:00", "level": "info", "event": "llm_call", "conversation_id": "conv_df5a00ea79ad", "purpose": "nlu", "model": "claude-sonnet-5-5", "request_id": "req_011CgJHACrACh6cr8SfqriSD", "stop_reason": "end_turn", "latency_ms": 1361, "input_tokens": 262, "output_tokens": 82, "cache_read_tokens": 1958}
+{"ts": "2026-10-23T01:11:54.295+00:00", "level": "info", "event": "handoff", "conversation_id": "conv_df5a00ea79ad", "handoff_id": "ho_856991f4017f", "reason": "pedido_humano", "priority": "normal"}
+{"ts": "2026-10-23T01:11:54.296+00:00", "level": "info", "event": "message_sent", "conversation_id": "conv_df5a00ea79ad", "message_id": "msg_e3b4867564b8", "source": "template"}
+{"ts": "2026-10-23T01:11:54.308+00:00", "level": "info", "event": "message_sent", "conversation_id": "conv_df5a00ea79ad", "message_id": "msg_e72e14aa39fd", "source": "template"}

@@ -1,0 +1,44 @@
+Trace da conversa conv_39485048fb0c (horários em UTC)
+
+01:11:10.193  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:11:10.194  ← lead     [text] msg_2d9bfc759e28: oi! quero cotar o seguro do meu Corolla 2018, só o plano premium
+01:11:12.070  · nlu       {"intents": ["saudacao"], "changed": ["veiculo_ano", "veiculo_modelo", "plano_id"]}
+01:11:12.073  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
+01:11:14.009  → agente   [llm] msg_e6486929e1c2:
+                Olá! Sou a assistente virtual da AutoSeguro e vou te ajudar a cotar o plano Premium para o seu Corolla 2018 🙂 Para começar, me conta a idade do motorista principal, o CEP de onde o carro dorme e a partir de quando você quer o seguro?
+01:11:14.013  ← lead     [text] msg_fa95485a6102: tenho 29 anos
+01:11:14.015  ← lead     [text] msg_a79b4419c42b: cep [CEP], começando dia 1º do mês que vem
+01:11:15.595  · nlu       {"changed": ["idade", "data_inicio", "cep"]}
+01:11:15.598  · decision  {"rule": "R19_cotar", "quote_plans": ["premium"]}
+01:11:15.600  → agente   [template] msg_894df4637198:
+                Só um instante, estou calculando sua cotação no sistema... ⏳
+01:11:15.606  $ tentativa q_f217d82499f1 rodada 0 #1: HTTP 500 http_500 (8 ms)
+01:11:15.856  $ tentativa q_f217d82499f1 rodada 0 #2: HTTP 502 http_502 (4 ms)
+01:11:16.246  $ tentativa q_f217d82499f1 rodada 0 #3: HTTP 503 http_503 (4 ms)
+01:11:16.898  $ tentativa q_f217d82499f1 rodada 0 #4: HTTP 503 http_503 (4 ms)
+01:11:16.903  $ cotação  q_f217d82499f1 premium: unavailable (http_503) [inline, 4 tentativa(s)]
+01:11:16.909  · quote_deferred {"quote_ids": ["q_f217d82499f1"]}
+01:11:16.911  → agente   [template] msg_4ecfb3ac2ef7:
+                Nosso sistema de cotação está instável agora e não consegui calcular a cotação. Não vou te passar um valor aproximado pra não te dar informação errada: assim que o sistema responder, te mando o valor certinho aqui.
+01:11:16.912  · stage_changed {"from_": "coletando", "to": "aguardando_cotacao"}
+01:11:17.552  · scenario_api_changed {"failure_rate": 0.0}
+01:11:21.920  $ tentativa q_f217d82499f1 rodada 1 #1: HTTP 200 ok (6 ms)
+01:11:21.929  $ cotação  q_f217d82499f1 premium: ok R$ 488,61/mês [deferred, 1 tentativa(s)]
+01:11:21.930  → agente   [template] msg_c18ae203ed00:
+                Saiu! Aqui está a cotação que estava pendente:
+                
+                *Premium*: R$ 488,61/mês
+                Coberturas: colisão, roubo, furto, danos a terceiros, vidros, carro reserva e assistência 24h
+                Franquia: R$ 1.500,00
+                
+                Início da vigência: 01/11/2026. Carência: roubo e furto passam a valer 30 dias após o início da vigência.
+                
+                Quer seguir com esse plano?
+                
+                Ref.: q_f217d82499f1
+01:11:21.931  · stage_changed {"from_": "aguardando_cotacao", "to": "cotado"}
+01:11:21.935  ← lead     [text] msg_0d08794d7670: vou pensar e te falo
+01:11:23.377  · nlu       {"intents": ["vai_pensar"]}
+01:11:23.379  · decision  {"rule": "R08_vai_pensar", "directive": "vai_pensar"}
+01:11:24.995  → agente   [llm] msg_a9cd58b8f492:
+                Sem problema, pode pensar com calma! Sua cotação do Premium fica registrada aqui, mas vale lembrar que os valores podem mudar com o tempo. Quando quiser continuar, é só me chamar por aqui 🙂

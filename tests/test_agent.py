@@ -18,6 +18,7 @@ from autoseguro.agent.orchestrator import Agent
 from autoseguro.agent.state import HandoffReason, Stage
 from autoseguro.quote import DeferredQuotes, PlanCatalog, QuoteResult, QuoteStatus
 from autoseguro.store import Store
+from autoseguro.trace import render_trace, render_transcript
 
 TODAY = dt.date.today()
 START = (TODAY.replace(day=1) + dt.timedelta(days=32)).replace(day=15)
@@ -268,6 +269,9 @@ def test_human_request_then_one_ack_then_silence(tmp_path, catalog):
     assert "especialistas" in agent.handle(cid, ["quero falar com uma pessoa"])[0]
     assert agent.handle(cid, ["alô?"]) == ["Um especialista já vai te responder por aqui. 🙂"]
     assert agent.handle(cid, ["??"]) == []
+    # the trace and the transcript render the handoff exactly once
+    assert render_trace(agent.store, cid).count("HANDOFF") == 1
+    assert render_transcript(agent.store, cid).count("Handoff") == 1
 
 
 def test_media_twice_goes_to_a_human(tmp_path, catalog):

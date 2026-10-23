@@ -10,7 +10,7 @@ lead_name = "Mariana Souza"
 [api]
 failure_rate = 0.2
 slow_rate = 0.1
-seed = 11
+seed = 1
 
 [[turns]]
 messages = ["Oi, vi o anúncio de vocês, quanto fica o seguro?"]

@@ -1,0 +1,21 @@
+Trace da conversa conv_df5a00ea79ad (horários em UTC)
+
+01:11:48.876  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:11:48.877  ← lead     [audio] msg_eea1988c601f: [audio] mensagem de voz (18s)
+01:11:48.878  · nlu       {"media": ["audio"]}
+01:11:48.878  · decision  {"rule": "R11_midia_ilegivel", "directive": "midia"}
+01:11:52.920  → agente   [llm] msg_cc1f0894e51c:
+                Olá! Sou a assistente virtual da AutoSeguro e vou te ajudar com a cotação do seu seguro auto 🙂 Por aqui eu só consigo ler mensagens de texto, então não consegui ouvir o seu áudio. Pode me escrever o que você precisa?
+01:11:52.924  ← lead     [text] msg_886cea7de5a2: prefiro falar com uma pessoa, pode ser?
+01:11:54.286  · nlu       {"intents": ["pedir_humano"]}
+01:11:54.292  · decision  {"rule": "R01_pedido_humano", "handoff": "pedido_humano"}
+01:11:54.293  ! HANDOFF  ho_856991f4017f motivo=pedido_humano prioridade=normal: Lead pediu para falar com uma pessoa.
+01:11:54.295  → agente   [template] msg_e3b4867564b8:
+                Claro! Vou te passar para um dos nossos especialistas. Ele continua o atendimento por aqui mesmo, em instantes.
+01:11:54.296  · stage_changed {"from_": "coletando", "to": "handoff"}
+01:11:54.303  ← lead     [text] msg_0300f3962a0e: oi?
+01:11:54.304  · message_during_handoff {"handoff_id": "ho_856991f4017f"}
+01:11:54.306  → agente   [template] msg_e72e14aa39fd:
+                Um especialista já vai te responder por aqui. 🙂
+01:11:54.309  ← lead     [text] msg_f1661a699eaa: alguém aí?
+01:11:54.311  · message_during_handoff {"handoff_id": "ho_856991f4017f"}

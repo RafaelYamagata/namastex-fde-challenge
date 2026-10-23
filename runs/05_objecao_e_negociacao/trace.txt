@@ -1,0 +1,57 @@
+Trace da conversa conv_6164f3812fdd (horários em UTC)
+
+01:11:38.369  · conversation_started {"channel": "scenario", "catalog_source": "live"}
+01:11:38.371  ← lead     [text] msg_d4d971febf17: oi, quero cotar o plano completo pro meu Kwid 2015
+01:11:40.151  · nlu       {"intents": ["saudacao"], "changed": ["veiculo_ano", "veiculo_modelo", "plano_id"]}
+01:11:40.154  · decision  {"rule": "R18_coletar_dados", "directive": "pedir_dados"}
+01:11:41.802  → agente   [llm] msg_d0b5f33561fa:
+                Olá! Sou a assistente virtual da AutoSeguro e vou te ajudar com a cotação do plano Completo para o seu Kwid 2015. 🚗 Para começar, me conta: qual a idade do motorista principal, o CEP de onde o carro dorme e a partir de quando você quer o seguro?
+01:11:41.807  ← lead     [text] msg_13d0976dc846: 31 anos, cep [CEP], pode ser a partir de amanhã
+01:11:43.200  · nlu       {"changed": ["idade", "data_inicio", "cep"]}
+01:11:43.202  · decision  {"rule": "R19_cotar", "quote_plans": ["completo"]}
+01:11:43.203  → agente   [template] msg_3211a9d58ce7:
+                Só um instante, estou calculando sua cotação no sistema... ⏳
+01:11:43.205  $ tentativa q_0921830882fe rodada 0 #1: HTTP 200 ok (6 ms)
+01:11:43.211  $ cotação  q_0921830882fe completo: ok R$ 395,66/mês [inline, 1 tentativa(s)]
+01:11:43.214  · outbound_pii_masked {"kinds": ["telefone"]}
+01:11:43.215  → agente   [template] msg_0362d230aaa7:
+                Sua cotação:
+                
+                *Completo*: R$ 395,66/mês
+                Coberturas: colisão, roubo, furto, danos a terceiros e vidros
+                Franquia: R$ 3.000,00
+                1º pagamento: R$ 114,87 (proporcional a 9 de 31 dias)
+                
+                Início da vigência: 23/10/2026. Como começa no meio do mês, o 1º pagamento cobre só os dias restantes de outubro; depois, mensalidade cheia. Carência: roubo e furto passam a valer 30 dias após o início da vigência.
+                
+                Quer seguir com esse plano?
+                
+                Ref.: q_[TELEFONE]fe
+01:11:43.216  · stage_changed {"from_": "coletando", "to": "cotado"}
+01:11:43.219  ← lead     [text] msg_e96f4209422a: nossa, achei caro
+01:11:44.553  · nlu       {"intents": ["objecao_preco"]}
+01:11:44.555  · decision  {"rule": "R06_objecao_alternativa", "directive": "alternativa", "quote_plans": ["essencial"]}
+01:11:46.531  → agente   [llm] msg_8f41f2c3fc8e:
+                Entendo, o valor pesa mesmo no orçamento. Posso te mostrar o plano Essencial como alternativa, com mensalidade menor: ele cobre colisão, roubo e furto, mas não inclui danos a terceiros nem vidros, e a franquia sobe de R$ 3.000,00 para R$ 4.500,00. Quer que eu faça essa cotação?
+01:11:46.534  $ tentativa q_ea22de5435d2 rodada 0 #1: HTTP 200 ok (4 ms)
+01:11:46.538  $ cotação  q_ea22de5435d2 essencial: ok R$ 226,01/mês [inline, 1 tentativa(s)]
+01:11:46.541  → agente   [template] msg_119acbb05282:
+                Sua cotação:
+                
+                *Essencial*: R$ 226,01/mês
+                Coberturas: colisão, roubo e furto
+                Franquia: R$ 4.500,00
+                1º pagamento: R$ 65,62 (proporcional a 9 de 31 dias)
+                
+                Início da vigência: 23/10/2026. Como começa no meio do mês, o 1º pagamento cobre só os dias restantes de outubro; depois, mensalidade cheia. Carência: roubo e furto passam a valer 30 dias após o início da vigência.
+                
+                Quer seguir com esse plano?
+                
+                Ref.: q_ea22de5435d2
+01:11:46.546  ← lead     [text] msg_99a45fe547da: a Porto Seguro me ofereceu menos
+01:11:48.165  · nlu       {"intents": ["concorrente"]}
+01:11:48.167  · decision  {"rule": "R07_negociacao", "handoff": "negociacao"}
+01:11:48.168  ! HANDOFF  ho_36d80290be45 motivo=negociacao prioridade=normal: Objeção (concorrente) depois de ver uma alternativa.
+01:11:48.170  → agente   [template] msg_93a39d321b00:
+                Entendo. Vou chamar um especialista que pode avaliar outras condições pra você. Ele te responde por aqui.
+01:11:48.171  · stage_changed {"from_": "cotado", "to": "handoff"}

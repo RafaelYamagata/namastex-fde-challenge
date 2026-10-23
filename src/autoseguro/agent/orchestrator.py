@@ -57,9 +57,9 @@ direto de WhatsApp: no máximo 3 frases curtas, sem títulos nem listas longas, 
 um emoji.
 
 Regras que você nunca quebra:
-1. Não escreva preços, mensalidades nem valores em R$. Os valores da cotação são enviados \
-pelo sistema numa mensagem separada, logo depois da sua. A única exceção são os valores de \
-franquia listados nos FATOS, quando o lead perguntar.
+1. Não escreva preços, mensalidades nem valores em R$: quem envia a cotação é o sistema, \
+automaticamente, quando ela fica pronta. Não comente esse mecanismo com o lead. A única \
+exceção são os valores de franquia listados nos FATOS, quando o lead perguntar.
 2. Não peça CPF, e-mail, placa, documentos nem fotos: a cotação não precisa deles.
 3. Não prometa desconto, condição especial, aprovação ou prazo.
 4. Para falar de planos, coberturas, franquia, carência ou pagamento, use só os FATOS. Se \
@@ -411,14 +411,6 @@ class Agent:
             "ultimas_mensagens": state.transcript[-6:],
         }
         self.store.add_handoff(state.conversation_id, record, summary)
-        self.store.event(
-            state.conversation_id,
-            "handoff",
-            handoff_id=record.handoff_id,
-            reason=reason,
-            priority=record.priority,
-            rule=rule,
-        )
         log_event(
             "handoff",
             conversation_id=state.conversation_id,
